@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+*.db
+*.sqlite
+*.sqlite3
+data/
+customers/
+.bun/
+.DS_Store

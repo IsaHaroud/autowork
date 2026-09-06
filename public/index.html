@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AUTOWORK — Automate the work. Focus on growth.</title>
+<meta name="description" content="AUTOWORK builds intelligent automations for Moroccan businesses. Tell us your repetitive task on Telegram/WhatsApp, test it, pay monthly." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        aw: {
+          navy: '#0B1B2D',
+          blue: '#1678E8',
+          'blue-dark': '#2859D0',
+          background: '#F8FAFC',
+          surface: '#FFFFFF',
+          muted: '#64748B',
+          border: '#E2E8F0',
+        }
+      },
+      fontFamily: {
+        sora: ['Sora','sans-serif'],
+        inter: ['Inter','sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+:root{
+  --aw-navy:#0B1B2D; --aw-blue:#1678E8; --aw-blue-dark:#283ED0;
+  --aw-gradient:linear-gradient(135deg,#1678E8 0%,#2859D0 100%);
+  --aw-background:#F8FAFC; --aw-surface:#FFFFFF; --aw-text:#0B1B2D;
+  --aw-muted:#64748B; --aw-border:#E2E8F0;
+}
+*{ -webkit-tap-highlight-color: transparent; }
+body{ font-family:'Inter',sans-serif; background:var(--aw-background); color:var(--aw-text); }
+h1,h2,h3,.font-sora{ font-family:'Sora',sans-serif; }
+.aw-button-primary{
+  background:linear-gradient(135deg,#1678E8,#2859D0);
+  color:white; border-radius:10px; padding:12px 22px; font-weight:600;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease;
+  box-shadow:0 8px 24px -8px rgba(22,120,232,.5);
+}
+.aw-button-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 32px -8px rgba(22,120,232,.6); }
+.aw-button-secondary{
+  background:white; border:1px solid var(--aw-border); color:var(--aw-navy);
+  border-radius:10px; padding:12px 22px; font-weight:600;
+  display:inline-flex; align-items:center; gap:8px; transition:all .15s;
+}
+.aw-button-secondary:hover{ border-color:var(--aw-blue); color:var(--aw-blue); transform:translateY(-1px); }
+.aw-card{
+  background:#FFFFFF; border:1px solid #E2E8F0; border-radius:14px; padding:24px;
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.aw-card:hover{ transform:translateY(-4px); border-color:#1678E8; box-shadow:0 16px 40px -16px rgba(11,27,45,.15); }
+.motion-lines{ display:flex; flex-direction:column; gap:5px; }
+.motion-lines span{ height:3px; border-radius:99px; background:var(--aw-gradient); display:block; }
+.eyebrow{ display:flex; align-items:center; gap:12px; }
+.eyebrow .motion-lines span:nth-child(1){ width:18px; }
+.eyebrow .motion-lines span:nth-child(2){ width:36px; }
+.eyebrow .motion-lines span:nth-child(3){ width:14px; }
+.eyebrow-text{ font-family:'Sora'; font-size:12px; letter-spacing:.18em; font-weight:700; color:var(--aw-blue); text-transform:uppercase; }
+.hero-grid-bg{
+  background-image:
+    linear-gradient(to right, #E2E8F0 1px, transparent 1px),
+    linear-gradient(to bottom, #E2E8F0 1px, transparent 1px);
+  background-size:32px 32px;
+  mask-image:radial-gradient(ellipse 90% 80% at 50% 20%, black 40%, transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 80% at 50% 20%, black 40%, transparent 75%);
+}
+.flow-arrow{ color:#1678E8; font-weight:800; }
+.status-dot{ width:8px; height:8px; border-radius:99px; display:inline-block; }
+.step-num{
+  width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background:var(--aw-navy); color:white; font-family:'Sora'; font-weight:800; font-size:15px; flex-shrink:0;
+}
+code.inline{ background:#0B1B2D; color:#7DD3FC; padding:2px 8px; border-radius:6px; font-size:12px; }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- NAV -->
+<header class="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-aw-border">
+  <div class="max-w-7xl mx-auto px-5 h-[64px] flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-[10px] flex items-center justify-center font-sora font-extrabold text-white text-lg" style="background:linear-gradient(135deg,#1678E8,#2859D0)">A</div>
+      <span class="font-sora font-extrabold tracking-wide text-[18px] text-aw-navy">AUTOWORK</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-[14px] font-medium text-aw-navy">
+      <a href="#solutions" class="hover:text-aw-blue">Solutions</a>
+      <a href="#how" class="hover:text-aw-blue">How it works</a>
+      <a href="#usecases" class="hover:text-aw-blue">Use cases</a>
+      <a href="#pricing" class="hover:text-aw-blue">Pricing</a>
+      <a href="#contact" class="hover:text-aw-blue">Contact</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="/admin" class="hidden sm:inline-flex text-[13px] font-semibold text-aw-muted hover:text-aw-navy">Admin →</a>
+      <a href="#contact" class="aw-button-primary !py-2.5 !px-5 text-[14px]">Start Automating →</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 hero-grid-bg opacity-60"></div>
+  <div class="relative max-w-7xl mx-auto px-5 pt-14 pb-12 md:pt-20 md:pb-20 grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <div class="eyebrow mb-5">
+        <div class="motion-lines"><span></span><span></span><span></span></div>
+        <span class="eyebrow-text">Automation for Moroccan businesses</span>
+      </div>
+      <h1 class="font-sora font-extrabold text-aw-navy leading-[1.05] text-[38px] md:text-[56px]">
+        STOP DOING<br>REPETITIVE WORK.
+      </h1>
+      <p class="mt-5 text-[17px] leading-relaxed text-aw-muted max-w-[480px]">
+        Let <strong class="text-aw-navy">AUTOWORK</strong> handle the work your business repeats every day.
+        Tell us the task on <strong class="text-aw-navy">Telegram / WhatsApp</strong> — we build it, you test it, you pay monthly if you love it.
+      </p>
+      <div class="mt-7 flex flex-wrap gap-3">
+        <a id="cta-telegram" href="https://t.me/autowork0_bot" target="_blank" class="aw-button-primary">Automate My Business →</a>
+        <a id="cta-whatsapp" href="https://wa.me/212639989745?text=Hi%20AUTOWORK%2C%20I%20want%20to%20automate%20..." target="_blank" class="aw-button-secondary">
+          <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> WhatsApp us
+        </a>
+      </div>
+      <div class="mt-6 flex items-center gap-5 text-[13px] text-aw-muted">
+        <div class="flex items-center gap-2"><span class="status-dot bg-green-500"></span> No upfront payment</div>
+        <div class="flex items-center gap-2"><span class="status-dot bg-aw-blue"></span> Test before you pay</div>
+        <div class="flex items-center gap-2"><span class="status-dot bg-aw-navy"></span> Monthly, cancel anytime</div>
+      </div>
+      <div class="mt-8 grid grid-cols-3 gap-4 max-w-[440px]">
+        <div class="aw-card !p-4 text-center"><div class="font-sora font-extrabold text-[22px] text-aw-navy">100+</div><div class="text-[12px] text-aw-muted font-medium">Tasks automated</div></div>
+        <div class="aw-card !p-4 text-center"><div class="font-sora font-extrabold text-[22px] text-aw-navy">24h</div><div class="text-[12px] text-aw-muted font-medium">Avg. first version</div></div>
+        <div class="aw-card !p-4 text-center"><div class="font-sora font-extrabold text-[22px] text-aw-navy">TRIAL</div><div class="text-[12px] text-aw-muted font-medium">Free test first</div></div>
+      </div>
+    </div>
+
+    <!-- Visual: workflow card -->
+    <div class="relative">
+      <div class="absolute -inset-6 opacity-20 blur-2xl" style="background:linear-gradient(135deg,#1678E833,#2859D033)"></div>
+      <div class="relative aw-card !p-0 overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-aw-border flex items-center justify-between bg-aw-background">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-400 inline-block"></span>
+          </div>
+          <span class="text-[12px] font-sora font-bold tracking-widest text-aw-muted">LIVE AUTOMATION</span>
+        </div>
+        <div class="p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center text-white font-bold">W</div>
+            <div><div class="font-semibold text-[14px]">WhatsApp Order</div><div class="text-[12px] text-aw-muted">New message • 09:00</div></div>
+            <span class="ml-auto text-[11px] font-bold px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">RECEIVED</span>
+          </div>
+          <div class="my-2 pl-5 text-[20px] flow-arrow">↓</div>
+          <div class="rounded-xl border border-aw-border p-4 bg-aw-background">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[13px] font-bold" style="background:var(--aw-gradient)">⚙</div>
+              <span class="font-sora font-bold text-[13px]">AUTOWORK ENGINE</span>
+              <span class="ml-auto text-[11px] text-aw-muted font-mono">C-0012 • order-processing</span>
+            </div>
+            <div class="font-mono text-[12px] leading-relaxed text-aw-navy">
+              <div>✓ Read Excel (127 orders)</div>
+              <div>✓ Validate + deduplicate</div>
+              <div>✓ Generate invoices PDF</div>
+              <div>✓ Update stock sheet</div>
+            </div>
+          </div>
+          <div class="my-2 pl-5 text-[20px] flow-arrow">↓</div>
+          <div class="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
+            <div class="w-10 h-10 rounded-xl bg-aw-navy flex items-center justify-center text-white">✓</div>
+            <div><div class="font-semibold text-[14px]">Completed in 38s</div><div class="text-[12px] text-green-700">Report sent to Telegram + WhatsApp</div></div>
+          </div>
+          <div class="mt-4 flex gap-2">
+            <code class="inline">TRIAL → ACTIVE (+30d)</code>
+            <code class="inline">500 DH/mo</code>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 flex gap-3">
+        <div class="aw-card !py-3 !px-4 flex-1 flex items-center gap-2 text-[13px] font-semibold"><span>✈</span> Telegram Bot</div>
+        <div class="aw-card !py-3 !px-4 flex-1 flex items-center gap-2 text-[13px] font-semibold"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> WhatsApp API</div>
+        <div class="aw-card !py-3 !px-4 flex-1 flex items-center gap-2 text-[13px] font-semibold"><span>◷</span> Cron Jobs</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTIONS -->
+<section id="solutions" class="max-w-7xl mx-auto px-5 py-14">
+  <div class="eyebrow mb-3"><div class="motion-lines"><span></span><span></span><span></span></div><span class="eyebrow-text">Solutions</span></div>
+  <h2 class="font-sora font-extrabold text-[28px] md:text-[36px] text-aw-navy">What we automate for you</h2>
+  <p class="text-aw-muted mt-2 max-w-[620px]">If you do it every day on a computer — we can automate it. You keep using Telegram / WhatsApp, we do the boring work.</p>
+  <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="aw-card"><div class="text-[26px]">🧾</div><h3 class="font-bold mt-2">Order Processing</h3><p class="text-[14px] text-aw-muted mt-1.5 leading-relaxed">WhatsApp / Excel orders → validated, invoiced, stocked. Daily at 9am or instant.</p><div class="mt-3 text-[12px] font-semibold text-aw-blue">TRIAL → test with your real file</div></div>
+    <div class="aw-card"><div class="text-[26px]">📊</div><h3 class="font-bold mt-2">Excel Reports</h3><p class="text-[14px] text-aw-muted mt-1.5 leading-relaxed">Sales, stock, salaries — auto-generated and sent to you every morning.</p><div class="mt-3 text-[12px] font-semibold text-aw-blue">PDF + Excel in your inbox</div></div>
+    <div class="aw-card"><div class="text-[26px]">📄</div><h3 class="font-bold mt-2">PDF Invoices</h3><p class="text-[14px] text-aw-muted mt-1.5 leading-relaxed">From order list to clean branded invoices, numbered and archived.</p><div class="mt-3 text-[12px] font-semibold text-aw-blue">Ready for your accountant</div></div>
+    <div class="aw-card"><div class="text-[26px]">🌐</div><h3 class="font-bold mt-2">Browser Automation</h3><p class="text-[14px] text-aw-muted mt-1.5 leading-relaxed">Fill forms, scrape prices, upload products — without opening your laptop.</p><div class="mt-3 text-[12px] font-semibold text-aw-blue">Runs on our PC 24/7</div></div>
+    <div class="aw-card"><div class="text-[26px]">💬</div><h3 class="font-bold mt-2">WhatsApp Business</h3><p class="text-[14px] text-aw-muted mt-1.5 leading-relaxed">Auto-replies, order confirmations, catalogs via official WhatsApp API.</p><div class="mt-3 text-[12px] font-semibold text-aw-blue">We manage your number</div></div>
+    <div class="aw-card"><div class="text-[26px]">⏰</div><h3 class="font-bold mt-2">Cron Jobs</h3><p class="text-[14px] text-aw-muted mt-1.5 leading-relaxed">Every hour, day, Monday 8am — your task runs even when you sleep.</p><div class="mt-3 text-[12px] font-semibold text-aw-blue">ACTIVE only if paid</div></div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="how" class="bg-white border-y border-aw-border">
+  <div class="max-w-7xl mx-auto px-5 py-14">
+    <div class="eyebrow mb-3"><div class="motion-lines"><span></span><span></span><span></span></div><span class="eyebrow-text">How it works</span></div>
+    <h2 class="font-sora font-extrabold text-[28px] md:text-[36px] text-aw-navy">From repetitive task to automation in 3 steps</h2>
+    <div class="mt-8 grid md:grid-cols-3 gap-5">
+      <div class="aw-card !bg-aw-background">
+        <div class="flex items-center gap-3"><div class="step-num">1</div><h3 class="font-bold">Tell us your task</h3></div>
+        <p class="text-[14px] text-aw-muted mt-3 leading-relaxed">Click our Telegram bot or WhatsApp. Send your Telegram ID + describe the task. Example: <em>“I process 100 orders in Excel every day.”</em></p>
+        <div class="mt-4 flex gap-2"><a href="https://t.me/autowork0_bot" class="text-[13px] font-bold text-aw-blue">t.me bot →</a><a href="https://wa.me/212639989745" class="text-[13px] font-bold text-aw-blue">WhatsApp →</a></div>
+      </div>
+      <div class="aw-card !bg-aw-background">
+        <div class="flex items-center gap-3"><div class="step-num">2</div><h3 class="font-bold">We build, you test</h3></div>
+        <p class="text-[14px] text-aw-muted mt-3 leading-relaxed">We create your isolated service <code class="inline">C-XXXX / slug</code> in <span class="font-semibold text-aw-navy">TRIAL</span>. You test with real data. No payment yet.</p>
+        <div class="mt-4"><code class="inline">TRIAL 🟡 — free test</code></div>
+      </div>
+      <div class="aw-card !bg-aw-background" style="border-color:#1678E8">
+        <div class="flex items-center gap-3"><div class="step-num" style="background:linear-gradient(135deg,#1678E8,#2859D0)">3</div><h3 class="font-bold">Pay monthly, stay ACTIVE</h3></div>
+        <p class="text-[14px] text-aw-muted mt-3 leading-relaxed">Love it? Pay (e.g. 500 DH/mo). We activate <span class="font-semibold text-aw-navy">+30 days</span>. Expires → we remind → extend. Suspend anytime.</p>
+        <div class="mt-4"><code class="inline">ACTIVE 🟢 +30d — 500 DH/mo</code></div>
+      </div>
+    </div>
+    <div class="mt-6 rounded-[14px] border border-aw-border bg-aw-background p-5 flex flex-col md:flex-row items-start md:items-center gap-4">
+      <div class="font-mono text-[13px] leading-relaxed flex-1">
+        <span class="text-aw-muted">you:</span> /start → ID <span class="font-bold text-aw-navy">123456789</span> → WhatsApp owner<br>
+        <span class="text-aw-muted">us:</span> /addservice C-0012 order-processing | automate Excel daily | 500 → <span class="text-aw-blue font-bold">TRIAL</span><br>
+        <span class="text-aw-muted">you:</span> test ✓ → pay → <span class="text-green-700 font-bold">ACTIVE +30d</span>
+      </div>
+      <a href="#contact" class="aw-button-primary whitespace-nowrap">Start Step 1 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section id="usecases" class="max-w-7xl mx-auto px-5 py-14">
+  <div class="eyebrow mb-3"><div class="motion-lines"><span></span><span></span><span></span></div><span class="eyebrow-text">Use cases</span></div>
+  <h2 class="font-sora font-extrabold text-[28px] md:text-[36px] text-aw-navy">Built for businesses like yours</h2>
+  <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="aw-card"><h3 class="font-bold text-[15px]">🛒 E-commerce</h3><p class="text-[13px] text-aw-muted mt-2">COD orders from WhatsApp → Excel → delivery labels. Save 2h/day.</p></div>
+    <div class="aw-card"><h3 class="font-bold text-[15px]">📦 Wholesalers</h3><p class="text-[13px] text-aw-muted mt-2">Stock entries, supplier invoices, daily margin report at 8am.</p></div>
+    <div class="aw-card"><h3 class="font-bold text-[15px]">🧮 Accountants</h3><p class="text-[13px] text-aw-muted mt-2">Client files → standardized reports + PDF archive.</p></div>
+    <div class="aw-card"><h3 class="font-bold text-[15px]">🏢 Agencies</h3><p class="text-[13px] text-aw-muted mt-2">Lead scraping, follow-ups, reporting — on autopilot.</p></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="bg-aw-navy text-white">
+  <div class="max-w-7xl mx-auto px-5 py-14">
+    <div class="eyebrow mb-3"><div class="motion-lines"><span></span><span></span><span></span></div><span class="eyebrow-text !text-sky-300">Pricing — monthly, no surprise</span></div>
+    <h2 class="font-sora font-extrabold text-[28px] md:text-[36px]">Test free. Pay only if it works.</h2>
+    <p class="text-slate-300 mt-2">Every service starts in TRIAL. You pay only after testing with your real data.</p>
+    <div class="mt-8 grid md:grid-cols-3 gap-5">
+      <div class="rounded-[14px] bg-white text-aw-navy p-6 border border-white/10">
+        <div class="font-sora font-bold text-[13px] tracking-widest text-aw-blue">TRIAL</div>
+        <div class="font-sora font-extrabold text-[32px] mt-1">0 DH</div>
+        <p class="text-[13px] text-aw-muted">Test your automation with real data.</p>
+        <ul class="mt-4 space-y-2 text-[14px]"><li>✓ 1 service in TRIAL</li><li>✓ Real test run</li><li>✓ WhatsApp + Telegram</li></ul>
+        <a href="#contact" class="aw-button-secondary w-full justify-center mt-6">Start free test</a>
+      </div>
+      <div class="rounded-[14px] p-6 text-white border-2 border-aw-blue relative" style="background:linear-gradient(180deg,#10263f,#0B1B2D)">
+        <div class="absolute -top-3 left-6 text-[11px] font-bold px-3 py-1 rounded-full text-white" style="background:linear-gradient(135deg,#1678E8,#2859D0)">MOST POPULAR</div>
+        <div class="font-sora font-bold text-[13px] tracking-widest text-sky-300">ONE AUTOMATION</div>
+        <div class="font-sora font-extrabold text-[32px] mt-1">499 DH <span class="text-[15px] font-medium text-slate-300">/mo</span></div>
+        <p class="text-[13px] text-slate-300">One repetitive task, fully automated.</p>
+        <ul class="mt-4 space-y-2 text-[14px]"><li>✓ 1 ACTIVE service (+30d)</li><li>✓ Cron + on-demand</li><li>✓ Telegram + WhatsApp delivery</li><li>✓ Fixes included</li></ul>
+        <a href="#contact" class="aw-button-primary w-full justify-center mt-6">Automate My Business →</a>
+      </div>
+      <div class="rounded-[14px] bg-white text-aw-navy p-6">
+        <div class="font-sora font-bold text-[13px] tracking-widest text-aw-blue">BUSINESS</div>
+        <div class="font-sora font-extrabold text-[32px] mt-1">Custom</div>
+        <p class="text-[13px] text-aw-muted">Multiple automations, WhatsApp API.</p>
+        <ul class="mt-4 space-y-2 text-[14px]"><li>✓ 3+ services</li><li>✓ Your WhatsApp number managed</li><li>✓ Priority support</li></ul>
+        <a href="#contact" class="aw-button-secondary w-full justify-center mt-6">Talk to us</a>
+      </div>
+    </div>
+    <p class="mt-6 text-[13px] text-slate-400">Prices in MAD. Cancel anytime → service becomes SUSPENDED. No setup fee during launch.</p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="max-w-7xl mx-auto px-5 py-14">
+  <div class="rounded-[18px] p-8 md:p-12 text-white relative overflow-hidden" style="background:linear-gradient(135deg,#0B1B2D 0%,#14365e 55%,#2859D0 100%)">
+    <div class="absolute inset-0 opacity-15 hero-grid-bg !mask-none" style="mask-image:none;-webkit-mask-image:none"></div>
+    <div class="relative grid md:grid-cols-2 gap-8 items-center">
+      <div>
+        <div class="eyebrow mb-3"><div class="motion-lines"><span style="background:white"></span><span style="background:white"></span><span style="background:white"></span></div><span class="eyebrow-text !text-white">Get started in 2 minutes</span></div>
+        <h2 class="font-sora font-extrabold text-[28px] md:text-[38px] leading-tight">Tell us your repetitive task. We automate it.</h2>
+        <p class="mt-3 text-slate-200">Click below, send your ID + task description. We reply with your TRIAL service.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="https://t.me/autowork0_bot" target="_blank" class="bg-white text-aw-navy font-semibold rounded-[10px] px-6 py-3 inline-flex items-center gap-2 hover:-translate-y-0.5 transition-transform">✈ Start on Telegram →</a>
+          <a href="https://wa.me/212639989745?text=Hi%20AUTOWORK%2C%20my%20Telegram%20ID%20is%20...%20and%20I%20want%20to%20automate%20..." target="_blank" class="border border-white/40 text-white font-semibold rounded-[10px] px-6 py-3 inline-flex items-center gap-2 hover:bg-white/10">💬 WhatsApp +212639989745</a>
+        </div>
+      </div>
+      <div class="bg-white rounded-[14px] p-6 text-aw-navy">
+        <div class="font-sora font-bold">What to send us:</div>
+        <div class="mt-3 space-y-2.5 text-[14px]">
+          <div class="flex gap-2"><span class="font-bold text-aw-blue">1.</span> Your Telegram ID (get via /start) or WhatsApp number</div>
+          <div class="flex gap-2"><span class="font-bold text-aw-blue">2.</span> What you repeat daily (Excel, orders, invoices...)</div>
+          <div class="flex gap-2"><span class="font-bold text-aw-blue">3.</span> One example file / screenshot</div>
+        </div>
+        <div class="mt-4 rounded-[10px] bg-aw-background border border-aw-border p-3 font-mono text-[12px]">Hi AUTOWORK, my Telegram ID is 123456789. I want to automate my 100 daily Excel orders. Example attached.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-aw-border bg-white">
+  <div class="max-w-7xl mx-auto px-5 py-8 flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-[8px] flex items-center justify-center text-white font-sora font-extrabold" style="background:linear-gradient(135deg,#1678E8,#2859D0)">A</div>
+      <div><div class="font-sora font-extrabold text-aw-navy">AUTOWORK</div><div class="text-[12px] text-aw-muted">Automate the work. Focus on growth.</div></div>
+    </div>
+    <div class="text-[13px] text-aw-muted flex gap-5"><a href="#solutions" class="hover:text-aw-navy">Solutions</a><a href="#pricing" class="hover:text-aw-navy">Pricing</a><a href="/admin" class="hover:text-aw-navy">Admin</a><a href="/health" class="hover:text-aw-navy">Status</a></div>
+    <div class="text-[12px] text-aw-muted">© 2026 AUTOWORK • Casablanca, Morocco</div>
+  </div>
+</footer>
+
+<script>
+fetch('/api/admin/config').then(r=>r.json()).then(cfg=>{
+  if(cfg.ownerWhatsapp){
+    const num=(cfg.ownerWhatsapp||'').replace(/[^0-9]/g,'');
+    const wa=document.getElementById('cta-whatsapp');
+    if(wa&&num) wa.href=`https://wa.me/${num}?text=`+encodeURIComponent('Hi AUTOWORK, I want to automate...');
+  }
+  if(cfg.botUsername){
+    const tg=document.getElementById('cta-telegram');
+    if(tg) tg.href=`https://t.me/${cfg.botUsername}`;
+  }
+}).catch(()=>{});
+</script>
+</body>
+</html>

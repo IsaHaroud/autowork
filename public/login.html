@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AUTOWORK Admin — Locked</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Inter,sans-serif;background:#0B1B2D;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.card{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:Sora;font-weight:800;background:linear-gradient(135deg,#1678E8,#2859D0)}
+input{width:100%;box-sizing:border-box;border:1px solid #E2E8F0;border-radius:10px;padding:11px 13px;font-size:14px;margin-top:12px;outline:none}
+input:focus{border-color:#1678E8;box-shadow:0 0 0 3px #1678E81f}
+button{width:100%;margin-top:12px;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;color:#fff;cursor:pointer;background:linear-gradient(135deg,#1678E8,#2859D0)}
+.err{display:none;margin-top:8px;color:#DC2626;font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div style="display:flex;gap:10px;align-items:center"><div class="logo">A</div><div style="font-family:Sora;font-weight:800;font-size:17px">AUTOWORK Admin</div></div>
+  <div style="color:#64748B;font-size:13px;margin-top:6px">Private area. Enter password to continue.</div>
+  <input id="pw" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')go()" />
+  <div id="err" class="err">Wrong password.</div>
+  <button onclick="go()">🔓 Unlock</button>
+</div>
+<script>
+async function go(){
+  const pw = document.getElementById('pw').value;
+  document.getElementById('err').style.display='none';
+  const res = await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:pw})});
+  if(!res.ok){ document.getElementById('err').style.display='block'; return; }
+  localStorage.setItem('aw_token', pw);
+  document.cookie = 'aw_token=' + encodeURIComponent(pw) + '; Path=/; Max-Age=2592000; SameSite=Lax';
+  location.href = '/admin?token=' + encodeURIComponent(pw);
+}
+document.getElementById('pw').focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AUTOWORK Admin — Control Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { aw: { navy:'#0B1B2D', blue:'#1678E8', 'blue-dark':'#2859D0', background:'#F8FAFC', surface:'#FFFFFF', muted:'#64748B', border:'#E2E8F0' } },
+  fontFamily: { sora:['Sora','sans-serif'], inter:['Inter','sans-serif'], mono:['JetBrains Mono','monospace'] }
+}}};
+</script>
+<style>
+:root{ --aw-navy:#0B1B2D; --aw-blue:#1678E8; --aw-gradient:linear-gradient(135deg,#1678E8,#2859D0); }
+body{ font-family:'Inter',sans-serif; background:#F1F5F9; }
+.font-sora{ font-family:'Sora',sans-serif; }
+.sidebar-link{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; color:#94A3B8; font-size:14px; font-weight:600; cursor:pointer; transition:all .15s; }
+.sidebar-link:hover{ background:#16283d; color:white; }
+.sidebar-link.active{ background:linear-gradient(135deg,#1678E8,#2859D0); color:white; }
+.stat-card{ background:white; border:1px solid #E2E8F0; border-radius:14px; padding:18px; }
+.tbl th{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#64748B; font-weight:700; text-align:left; padding:10px 12px; border-bottom:1px solid #E2E8F0; }
+.tbl td{ padding:12px; border-bottom:1px solid #F1F5F9; font-size:13.5px; vertical-align:top; }
+.tbl tr:hover td{ background:#F8FAFC; }
+.badge{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; border:1px solid; }
+.b-green{ background:#ECFDF5; color:#047857; border-color:#A7F3D0; }
+.b-yellow{ background:#FFFBEB; color:#B45309; border-color:#FDE68A; }
+.b-red{ background:#FEF2F2; color:#B91C1C; border-color:#FECACA; }
+.b-blue{ background:#EFF6FF; color:#1D4ED8; border-color:#BFDBFE; }
+.b-gray{ background:#F8FAFC; color:#475569; border-color:#E2E8F0; }
+.btn{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:9px; border:1px solid #E2E8F0; background:white; cursor:pointer; transition:all .13s; }
+.btn:hover{ border-color:#1678E8; color:#1678E8; transform:translateY(-1px); }
+.btn-primary{ background:linear-gradient(135deg,#1678E8,#2859D0); color:white; border:none; }
+.btn-primary:hover{ color:white; filter:brightness(1.05); }
+.btn-danger:hover{ border-color:#DC2626; color:#DC2626; }
+input,select,textarea{ outline:none; }
+.field{ width:100%; border:1px solid #E2E8F0; border-radius:10px; padding:9px 12px; font-size:13.5px; background:white; }
+.field:focus{ border-color:#1678E8; box-shadow:0 0 0 3px #1678E81a; }
+.mono{ font-family:'JetBrains Mono',monospace; }
+#drawer{ transition:transform .22s ease; }
+.toast{ animation:slideIn .2s ease; }
+@keyframes slideIn{ from{ transform:translateY(8px); opacity:0 } to{ transform:none; opacity:1 } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE: blocks dashboard until correct ADMIN_TOKEN password -->
+<div id="loginGate" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:#0B1B2D">
+  <div class="w-full max-w-[380px] bg-white rounded-[16px] p-7 shadow-2xl">
+    <div class="flex items-center gap-2.5 mb-1">
+      <div class="w-9 h-9 rounded-[10px] flex items-center justify-center font-sora font-extrabold text-white" style="background:linear-gradient(135deg,#1678E8,#2859D0)">A</div>
+      <div class="font-sora font-extrabold text-[17px]">AUTOWORK Admin</div>
+    </div>
+    <div class="text-[13px] text-aw-muted mb-4">This dashboard is private. Enter your admin password.</div>
+    <div id="loginDevHint" class="hidden mb-3 rounded-[10px] border border-yellow-300 bg-yellow-50 p-2.5 text-[12px] text-yellow-900">Backend has no <span class="mono">ADMIN_TOKEN</span> — just click Unlock (dev mode).</div>
+    <input id="loginPass" type="password" placeholder="Admin password" class="field" onkeydown="if(event.key==='Enter')doLogin()" />
+    <div id="loginErr" class="hidden mt-2 text-[13px] font-semibold text-red-600">Wrong password.</div>
+    <button class="btn btn-primary w-full justify-center !py-2.5 mt-3" onclick="doLogin()">🔓 Unlock dashboard</button>
+    <div class="mt-3 text-[12px] text-aw-muted">Set it in <span class="mono">.env → ADMIN_TOKEN=your-secret</span>, restart, then enter it here. Saved in this browser only.</div>
+  </div>
+</div>
+
+<div class="flex min-h-screen">
+  <!-- SIDEBAR -->
+  <aside class="w-[228px] shrink-0 hidden md:flex flex-col p-4 sticky top-0 h-screen" style="background:#0B1B2D">
+    <div class="flex items-center gap-2.5 px-2 py-2">
+      <div class="w-9 h-9 rounded-[10px] flex items-center justify-center font-sora font-extrabold text-white" style="background:linear-gradient(135deg,#1678E8,#2859D0)">A</div>
+      <div><div class="font-sora font-extrabold text-white tracking-wide">AUTOWORK</div><div class="text-[11px] text-slate-400 font-semibold tracking-widest">ADMIN CENTER</div></div>
+    </div>
+    <div class="mt-6 space-y-1" id="nav">
+      <div class="sidebar-link active" data-page="overview">◈ Overview</div>
+      <div class="sidebar-link" data-page="customers">👥 Customers</div>
+      <div class="sidebar-link" data-page="services">⚙ Services</div>
+      <div class="sidebar-link" data-page="payments">💰 Payments</div>
+      <div class="sidebar-link" data-page="whatsapp">💬 WhatsApp</div>
+      <div class="sidebar-link" data-page="jobs">📋 Jobs</div>
+    </div>
+    <div class="mt-auto px-2">
+      <div class="rounded-[12px] bg-white/5 border border-white/10 p-3">
+        <div class="text-[11px] font-bold text-slate-400 tracking-widest">OWNER WHATSAPP</div>
+        <div id="ownerWa" class="text-[13px] font-mono text-white mt-1">…</div>
+        <a href="/" class="text-[12px] font-bold text-sky-300 hover:text-white mt-2 inline-block">← Landing page</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 min-w-0">
+    <!-- TOPBAR -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-aw-border px-5 py-3 flex items-center gap-3">
+      <div class="md:hidden font-sora font-extrabold">AUTOWORK</div>
+      <div class="hidden md:block font-sora font-bold text-[16px]" id="pageTitle">Overview</div>
+      <div class="flex-1"></div>
+      <input id="globalSearch" placeholder="Search C-0001, name, telegram ID…" class="field !w-[280px] hidden sm:block" oninput="onSearch(this.value)" />
+      <button class="btn btn-primary" onclick="refreshAll()">↻ Refresh</button>
+      <button class="btn" onclick="doLogout()" title="Lock dashboard on this browser">🔒 Lock</button>
+    </header>
+
+    <div class="md:hidden px-4 pt-3 flex gap-2 overflow-x-auto" id="mobileNav">
+      <button class="btn" data-page="overview">Overview</button><button class="btn" data-page="customers">Customers</button><button class="btn" data-page="services">Services</button><button class="btn" data-page="payments">Payments</button><button class="btn" data-page="whatsapp">WhatsApp</button><button class="btn" data-page="jobs">Jobs</button>
+    </div>
+
+    <main class="p-5 max-w-[1200px] mx-auto">
+      <div id="authWarn" class="hidden mb-4 rounded-[12px] border border-yellow-300 bg-yellow-50 p-3 text-[13px] text-yellow-900">⚠ Backend has no <span class="mono">ADMIN_TOKEN</span> — API is open. Set <span class="mono">ADMIN_TOKEN=secret</span> in .env and enter it top-right for production.</div>
+
+      <!-- OVERVIEW -->
+      <section id="page-overview">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="statCards"></div>
+        <div class="grid lg:grid-cols-2 gap-4 mt-4">
+          <div class="stat-card">
+            <div class="font-sora font-bold mb-3">⏳ Expiring in 7 days <span class="text-aw-muted font-inter font-medium text-[12px]">— remind / extend</span></div>
+            <div id="expiringList" class="space-y-2 text-[13px]"></div>
+          </div>
+          <div class="stat-card">
+            <div class="font-sora font-bold mb-3">⚡ Quick actions</div>
+            <div class="grid grid-cols-2 gap-2 text-[13px]">
+              <button class="btn justify-center" onclick="go('customers')">👥 Find customer</button>
+              <button class="btn justify-center" onclick="openServiceModal()">＋ Add service</button>
+              <button class="btn justify-center" onclick="go('payments')">💰 Record payment</button>
+              <button class="btn justify-center" onclick="openWaModal()">💬 Connect WA number</button>
+            </div>
+            <div class="mt-4 rounded-[10px] bg-aw-background border border-aw-border p-3 text-[12.5px] text-aw-muted leading-relaxed">
+              <strong class="text-aw-navy">Workflow:</strong> /start auto-creates C-XXXX TRIAL → <strong>Add service</strong> (TRIAL + folder) → customer tests → <strong>Activate / Paid</strong> (+30d) → monthly extend.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CUSTOMERS -->
+      <section id="page-customers" class="hidden">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="font-sora font-bold text-[16px]">👥 Customers</div><span class="flex-1"></span>
+          <button class="btn btn-primary" onclick="openCustomerModal()">＋ Add customer</button>
+        </div>
+        <div class="stat-card !p-0 overflow-hidden">
+          <div class="p-4 border-b border-aw-border font-sora font-bold flex items-center gap-3"><span id="custCount" class="badge b-gray">0</span>
+            <span class="flex-1"></span><span class="text-[12px] font-inter font-medium text-aw-muted">Click a row for channels, services, payments</span>
+          </div>
+          <div class="overflow-x-auto"><table class="w-full tbl"><thead><tr><th>ID</th><th>Name</th><th>Channels</th><th>Services</th><th>Status</th><th>Created</th></tr></thead><tbody id="custRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- SERVICES -->
+      <section id="page-services" class="hidden">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="font-sora font-bold text-[16px]">⚙ All services</div><span class="flex-1"></span>
+          <button class="btn btn-primary" onclick="openServiceModal()">＋ Add service</button>
+        </div>
+        <div class="stat-card !p-0 overflow-hidden"><div class="overflow-x-auto"><table class="w-full tbl"><thead><tr><th>ID</th><th>Customer</th><th>Name / slug</th><th>Status / expiry</th><th>Price</th><th>Actions</th></tr></thead><tbody id="svcRows"></tbody></table></div></div>
+      </section>
+
+      <!-- PAYMENTS -->
+      <section id="page-payments" class="hidden">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="font-sora font-bold text-[16px]">💰 Payments</div><span class="flex-1"></span>
+          <button class="btn btn-primary" onclick="openPayModal()">＋ Record payment</button>
+        </div>
+        <div class="stat-card !p-0 overflow-hidden"><div class="overflow-x-auto"><table class="w-full tbl"><thead><tr><th>ID</th><th>Customer</th><th>Service</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead><tbody id="payRows"></tbody></table></div></div>
+      </section>
+
+      <!-- WHATSAPP -->
+      <section id="page-whatsapp" class="hidden">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="font-sora font-bold text-[16px]">💬 WhatsApp Business accounts <span class="text-[12px] font-inter font-medium text-aw-muted">— numbers customers gave you control of</span></div><span class="flex-1"></span>
+          <button class="btn btn-primary" onclick="openWaModal()">＋ Connect number</button>
+        </div>
+        <div class="stat-card !p-0 overflow-hidden"><div class="overflow-x-auto"><table class="w-full tbl"><thead><tr><th>Label</th><th>Number</th><th>Customer</th><th>Phone ID</th><th>Status</th><th>Actions</th></tr></thead><tbody id="waRows"></tbody></table></div></div>
+        <div class="mt-3 stat-card text-[13px] text-aw-muted">Store the customer's <span class="mono">phone_number_id + access_token</span> here when they share their Meta app. Tokens are masked in lists. Your own bot number stays in <span class="mono">.env (WHATSAPP_PHONE_NUMBER_ID)</span>.</div>
+      </section>
+
+      <!-- JOBS -->
+      <section id="page-jobs" class="hidden">
+        <div class="font-sora font-bold text-[16px] mb-3">📋 Jobs <span class="text-[12px] font-inter font-medium text-aw-muted">— automation runs (log from your workers later)</span></div>
+        <div class="stat-card !p-0 overflow-hidden"><div class="overflow-x-auto"><table class="w-full tbl"><thead><tr><th>ID</th><th>Customer</th><th>Service</th><th>Status</th><th>Created</th></tr></thead><tbody id="jobRows"></tbody></table></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- DRAWER: customer detail -->
+<div id="drawerWrap" class="hidden fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/40" onclick="closeDrawer()"></div>
+  <div id="drawer" class="absolute right-0 top-0 h-full w-full max-w-[560px] bg-white shadow-2xl overflow-y-auto translate-x-full">
+    <div class="sticky top-0 bg-white border-b border-aw-border p-4 flex items-center gap-3">
+      <div class="font-sora font-extrabold text-[17px]" id="drawerTitle">C-0000</div>
+      <span id="drawerStatus"></span><span class="flex-1"></span>
+      <button class="btn" onclick="closeDrawer()">✕</button>
+    </div>
+    <div id="drawerBody" class="p-4 space-y-4"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="modalWrap" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40" onclick="closeModal()"></div>
+  <div class="relative bg-white rounded-[16px] w-full max-w-[520px] p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="font-sora font-bold text-[16px] mb-3" id="modalTitle">Modal</div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toasts" class="fixed bottom-5 right-5 z-[60] space-y-2"></div>
+
+<script>
+let STATE = { customers: [], services: [], payments: [], wa: [], jobs: [], stats: null, config: {} };
+const $ = (id) => document.getElementById(id);
+const getToken = () => (localStorage.getItem('aw_token') || '').trim();
+const apiHeaders = () => {
+  const t = getToken();
+  return t ? { 'Content-Type': 'application/json', 'x-admin-token': t } : { 'Content-Type': 'application/json' };
+};
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { ...apiHeaders(), ...(opts.headers || {}) } });
+  if (res.status === 401) {
+    showGate();
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Locked — enter password.');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+  return data;
+}
+
+// ---- password gate ----
+function showGate() { $('loginGate').classList.remove('hidden'); setTimeout(() => $('loginPass')?.focus(), 50); }
+function hideGate() { $('loginGate').classList.add('hidden'); $('loginErr').classList.add('hidden'); }
+async function doLogin() {
+  const pass = ($('loginPass').value || '').trim();
+  $('loginErr').classList.add('hidden');
+  try {
+    // verify against backend; backend compares with ADMIN_TOKEN
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: pass }),
+    });
+    if (!res.ok) { $('loginErr').classList.remove('hidden'); return; }
+    localStorage.setItem('aw_token', pass);
+    $('loginPass').value = '';
+    hideGate();
+    toast('Unlocked ✓');
+    refreshAll();
+  } catch (e) { $('loginErr').classList.remove('hidden'); }
+}
+function doLogout() { localStorage.removeItem('aw_token'); showGate(); toast('Locked'); }
+function toast(msg, err = false) {
+  const d = document.createElement('div');
+  d.className = 'toast rounded-[10px] px-4 py-2.5 text-[13px] font-semibold shadow-lg ' + (err ? 'bg-red-600 text-white' : 'bg-aw-navy text-white');
+  d.textContent = msg; $('toasts').appendChild(d);
+  setTimeout(() => d.remove(), 3200);
+}
+function fmtDH(cents) { if (cents == null) return '—'; return (cents / 100).toFixed(cents % 100 ? 2 : 0) + ' DH'; }
+function statusBadge(s) {
+  if (s === 'ACTIVE') return '<span class="badge b-green">🟢 ACTIVE</span>';
+  if (s === 'TRIAL') return '<span class="badge b-yellow">🟡 TRIAL</span>';
+  if (s === 'SUSPENDED') return '<span class="badge b-red">🔴 SUSPENDED</span>';
+  if (s === 'PAID') return '<span class="badge b-green">PAID</span>';
+  if (s === 'CONNECTED') return '<span class="badge b-green">CONNECTED</span>';
+  if (s === 'EXPIRED' || s === 'CANCELLED') return '<span class="badge b-red">' + s + '</span>';
+  return '<span class="badge b-gray">' + (s || '—') + '</span>';
+}
+function expiryTxt(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso), days = Math.ceil((d - Date.now()) / 864e5);
+  return d.toISOString().slice(0, 10) + (days > 0 ? ` (${days}d)` : days === 0 ? ' (today)' : ' (expired)');
+}
+function tgLink(id) { return id && id !== '—' ? `<a class="mono text-aw-blue hover:underline" href="tg://user?id=${id}" title="Open in Telegram">${id}</a> <button class="btn !py-0.5 !px-1.5" onclick="navigator.clipboard.writeText('${id}');toast('Copied')">⧉</button>` : '—'; }
+function waLink(num) {
+  if (!num || num === '—') return '—';
+  const clean = String(num).replace(/[^0-9]/g, '');
+  return `<a class="mono text-green-700 hover:underline" target="_blank" href="https://wa.me/${clean}">${num}</a> <button class="btn !py-0.5 !px-1.5" onclick="navigator.clipboard.writeText('${num}');toast('Copied')">⧉</button>`;
+}
+
+// nav
+function go(page) {
+  document.querySelectorAll('#nav .sidebar-link').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+  ['overview','customers','services','payments','whatsapp','jobs'].forEach(p => $('page-' + p).classList.toggle('hidden', p !== page));
+  $('pageTitle').textContent = page[0].toUpperCase() + page.slice(1);
+}
+document.querySelectorAll('#nav .sidebar-link').forEach(el => el.onclick = () => go(el.dataset.page));
+document.querySelectorAll('#mobileNav button').forEach(el => el.onclick = () => go(el.dataset.page));
+
+// load
+async function boot() {
+  // public config first (no password needed) to know if backend has a password
+  let cfg = {};
+  try { cfg = await (await fetch('/api/admin/config')).json(); } catch {}
+  STATE.config = cfg;
+  $('ownerWa').textContent = cfg.ownerWhatsapp || '—';
+  $('loginDevHint').classList.toggle('hidden', !!cfg.adminTokenSet);
+  $('authWarn').classList.toggle('hidden', !!cfg.adminTokenSet);
+  if (!cfg.adminTokenSet) {
+    // dev mode: no password set on server, open directly
+    hideGate();
+    refreshAll();
+    return;
+  }
+  // production: need password. Try saved token silently.
+  if (getToken()) {
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: getToken() }),
+      });
+      if (res.ok) { hideGate(); refreshAll(); return; }
+    } catch {}
+  }
+  showGate();
+}
+
+async function refreshAll() {
+  try {
+    const [stats, customers, services, payments, wa, jobs, cfg] = await Promise.all([
+      api('/api/admin/stats'), api('/api/admin/customers'),
+      api('/api/admin/services'), api('/api/admin/payments'),
+      api('/api/admin/whatsapp-accounts'), api('/api/admin/jobs'),
+      fetch('/api/admin/config').then(r => r.json()).catch(() => ({})),
+    ]);
+    STATE = { customers, services, payments, wa, jobs, stats, config: cfg };
+    $('ownerWa').textContent = cfg.ownerWhatsapp || stats.ownerWhatsapp || '—';
+    $('authWarn').classList.toggle('hidden', !!cfg.adminTokenSet);
+    renderStats(); renderCustomers(); renderServices(); renderPayments(); renderWa(); renderJobs();
+  } catch (e) {
+    if (String(e.message).includes('Locked') || String(e.message).includes('Unauthorized')) showGate();
+    else toast(String(e.message), true);
+  }
+}
+function onSearch(v) {
+  v = v.trim();
+  if (!v) { renderCustomers(); return; }
+  api('/api/admin/customers?q=' + encodeURIComponent(v)).then(list => { STATE.customers = list; renderCustomers(); }).catch(e => toast(e.message, true));
+}
+
+function renderStats() {
+  const s = STATE.stats; if (!s) return;
+  $('statCards').innerHTML = `
+    <div class="stat-card"><div class="text-[11px] font-bold tracking-widest text-aw-muted">CUSTOMERS</div><div class="font-sora font-extrabold text-[26px]">${s.customersTotal}</div><div class="text-[12px] text-aw-muted">🟢 ${s.customersActive} • 🟡 ${s.customersTrial} • 🔴 ${s.customersSuspended}</div></div>
+    <div class="stat-card"><div class="text-[11px] font-bold tracking-widest text-aw-muted">SERVICES</div><div class="font-sora font-extrabold text-[26px]">${s.servicesTotal}</div><div class="text-[12px] text-aw-muted">🟢 ${s.servicesActive} active • 🟡 ${s.servicesTrial} trial</div></div>
+    <div class="stat-card"><div class="text-[11px] font-bold tracking-widest text-aw-muted">REVENUE</div><div class="font-sora font-extrabold text-[26px]">${fmtDH(s.revenueCents)}</div><div class="text-[12px] text-aw-muted">paid total</div></div>
+    <div class="stat-card"><div class="text-[11px] font-bold tracking-widest text-aw-muted">JOBS</div><div class="font-sora font-extrabold text-[26px]">${s.jobsTotal}</div><div class="text-[12px] text-aw-muted">${s.jobsFailed} failed</div></div>`;
+  $('expiringList').innerHTML = s.expiringSoon.length ? s.expiringSoon.map(e =>
+    `<div class="flex items-center gap-2 rounded-[10px] border border-aw-border p-2.5"><div class="mono font-bold">${e.customer_id}</div><div class="flex-1 min-w-0"><div class="font-semibold truncate">${e.name}</div><div class="text-[12px] text-aw-muted">exp ${expiryTxt(e.expires_at)}</div></div><button class="btn" onclick="svcExtend(${e.id},30)">+30d</button></div>`
+  ).join('') : '<div class="text-aw-muted text-[13px]">Nothing expiring soon. 🎉</div>';
+}
+
+function renderCustomers() {
+  $('custCount').textContent = STATE.customers.length;
+  $('custRows').innerHTML = STATE.customers.map(c => {
+    const tg = (c.identities || []).find(i => i.type === 'telegram')?.external_id || '—';
+    const wa = (c.identities || []).find(i => i.type === 'whatsapp')?.external_id || '—';
+    const svc = (c.services || []).map(s => `<span class="badge ${s.status === 'ACTIVE' ? 'b-green' : s.status === 'TRIAL' ? 'b-yellow' : 'b-red'}">${s.name}</span>`).join(' ') || '<span class="text-aw-muted">—</span>';
+    return `<tr class="cursor-pointer" onclick="openCustomer('${c.id}')">
+      <td class="mono font-bold text-aw-blue">${c.id}</td>
+      <td><div class="font-semibold">${c.name || '—'}</div><div class="text-[12px] text-aw-muted">${c.username ? '@' + c.username : ''}</div></td>
+      <td class="mono text-[12px]">✈ ${tg}<br><span class="text-green-700">✆ ${wa}</span></td>
+      <td><div class="flex flex-wrap gap-1 max-w-[260px]">${svc}</div></td>
+      <td>${statusBadge(c.status)}</td>
+      <td class="text-aw-muted text-[12px]">${(c.created_at || '').slice(0, 10)}</td></tr>`;
+  }).join('') || '<tr><td colspan="6" class="text-center text-aw-muted py-8">No customers yet — they appear after /start on Telegram.</td></tr>';
+}
+
+function renderServices() {
+  $('svcRows').innerHTML = STATE.services.map(s =>
+    `<tr><td class="mono">#${s.id}</td>
+    <td><span class="mono font-bold text-aw-blue cursor-pointer" onclick="openCustomer('${s.customer_id}')">${s.customer_id}</span><div class="text-[11px] text-aw-muted">${s.customer_name || ''}</div></td>
+    <td><div class="font-semibold">${s.name}</div><div class="mono text-[11px] text-aw-muted">${s.slug || ''}</div></td>
+    <td>${statusBadge(s.status)}<div class="text-[11px] text-aw-muted mono">exp ${expiryTxt(s.expires_at)}</div></td>
+    <td class="font-semibold">${fmtDH(s.price)}/mo</td>
+    <td><div class="flex flex-wrap gap-1">
+      <button class="btn" onclick="svcActivate(${s.id})">Activate</button>
+      <button class="btn" onclick="svcExtend(${s.id},30)">+30d</button>
+      <button class="btn" onclick="openPayModal('${s.customer_id}',${s.id})">Paid</button>
+      <button class="btn" onclick="svcSuspend(${s.id})">Suspend</button>
+      <button class="btn btn-danger" onclick="svcRemove(${s.id})">Remove</button>
+    </div></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center text-aw-muted py-8">No services — add one with ＋ Add service.</td></tr>';
+}
+
+function renderPayments() {
+  $('payRows').innerHTML = STATE.payments.map(p =>
+    `<tr><td class="mono">#${p.id}</td><td class="mono text-aw-blue">${p.customer_id}</td><td class="mono">${p.service_id || '—'}</td>
+    <td class="font-bold">${fmtDH(p.amount)}</td><td>${p.method || '—'} ${statusBadge(p.status)}</td><td class="text-aw-muted text-[12px]">${(p.paid_at || p.created_at || '').slice(0, 10)}</td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center text-aw-muted py-8">No payments yet.</td></tr>';
+}
+
+function renderWa() {
+  $('waRows').innerHTML = STATE.wa.map(w =>
+    `<tr><td class="font-semibold">${w.label || '—'}</td>
+    <td class="mono">${w.display_number || '—'}</td>
+    <td class="mono text-aw-blue">${w.customer_id ? `<span class="cursor-pointer" onclick="openCustomer('${w.customer_id}')">${w.customer_id}</span>` : '<span class="text-aw-muted">shared / unassigned</span>'}</td>
+    <td class="mono text-[11px]">${w.phone_number_id || '—'}</td>
+    <td>${statusBadge(w.status)}</td>
+    <td><div class="flex gap-1"><button class="btn btn-danger" onclick="waDelete(${w.id})">Remove</button></div></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center text-aw-muted py-8">No WhatsApp accounts connected. Click ＋ Connect number when a customer shares access.</td></tr>';
+}
+
+function renderJobs() {
+  $('jobRows').innerHTML = STATE.jobs.map(j =>
+    `<tr><td class="mono">#${j.id}</td><td class="mono">${j.customer_id}</td><td class="mono">${j.service_id || '—'}</td><td>${statusBadge(j.status)}</td><td class="text-aw-muted text-[12px]">${(j.created_at || '').slice(0, 16).replace('T', ' ')}</td></tr>`
+  ).join('') || '<tr><td colspan="5" class="text-center text-aw-muted py-8">No jobs logged yet.</td></tr>';
+}
+
+// drawer
+async function openCustomer(id) {
+  $('drawerWrap').classList.remove('hidden');
+  requestAnimationFrame(() => $('drawer').classList.remove('translate-x-full'));
+  $('drawerTitle').textContent = id; $('drawerBody').innerHTML = 'Loading…';
+  try {
+    const c = await api('/api/admin/customers/' + id);
+    const tg = (c.identities || []).find(i => i.type === 'telegram')?.external_id || '—';
+    const wa = (c.identities || []).find(i => i.type === 'whatsapp')?.external_id || '—';
+    $('drawerStatus').innerHTML = statusBadge(c.status);
+    $('drawerBody').innerHTML = `
+      <div class="rounded-[12px] border border-aw-border p-4">
+        <div class="font-sora font-bold mb-2">👤 ${c.name || '—'} ${c.username ? '<span class="text-aw-muted font-inter font-medium">@' + c.username + '</span>' : ''}</div>
+        <div class="flex gap-2 mb-3">
+          <input id="editName" class="field" value="${c.name || ''}" placeholder="Name" />
+          <input id="editUser" class="field" value="${c.username || ''}" placeholder="@username" />
+          <button class="btn" onclick="saveProfile('${c.id}')">Save</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-[13px]">
+          <div class="rounded-[10px] bg-aw-background border border-aw-border p-3"><div class="text-[11px] font-bold text-aw-muted">TELEGRAM ID</div><div class="mt-1">${tgLink(tg)}</div>
+            ${tg === '—' ? `<div class="flex gap-1 mt-2"><input id="addTg" class="field mono !py-1.5" placeholder="123456789" /><button class="btn" onclick="attachChannel('${c.id}','telegram')">Link</button></div>` : `<button class="btn !py-1 mt-2" onclick="detachChannel('${c.id}','telegram','${tg}')">Unlink</button>`}
+            <div class="text-[11px] text-aw-muted mt-1">auto on /start, or link manually</div></div>
+          <div class="rounded-[10px] bg-green-50 border border-green-200 p-3"><div class="text-[11px] font-bold text-green-800">WHATSAPP</div><div class="mt-1">${waLink(wa ? '+' + String(wa).replace(/^\+/, '') : '—')}</div>
+            ${wa === '—' ? `<div class="flex gap-1 mt-2"><input id="addWa" class="field mono !py-1.5" placeholder="2126XXXXXXXX" /><button class="btn" onclick="attachChannel('${c.id}','whatsapp')">Link</button></div>` : `<button class="btn !py-1 mt-2" onclick="detachChannel('${c.id}','whatsapp','${wa}')">Unlink</button>`}
+            <div class="text-[11px] text-green-700 mt-1">link now, number works later</div></div>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-1.5">
+          <button class="btn" onclick="custStatus('${c.id}','ACTIVE')">🟢 Activate</button>
+          <button class="btn" onclick="custStatus('${c.id}','SUSPENDED')">🔴 Suspend</button>
+          <button class="btn" onclick="custStatus('${c.id}','TRIAL')">🟡 Trial</button>
+          <button class="btn btn-danger" onclick="custDelete('${c.id}')">🗑 Delete</button>
+        </div>
+        <div class="mt-3"><div class="text-[11px] font-bold text-aw-muted mb-1">NOTES</div>
+        <textarea id="notesField" class="field" rows="2" placeholder="e.g. Boutique Casa, speaks French, pays cash…">${c.notes || ''}</textarea>
+        <button class="btn btn-primary mt-2" onclick="saveNotes('${c.id}')">Save notes</button></div>
+      </div>
+      <div class="rounded-[12px] border border-aw-border p-4">
+        <div class="font-sora font-bold mb-2">⚙ Services (${c.services.length}) <button class="btn !py-1 ml-2" onclick="openServiceModal('${c.id}')">＋ Add</button></div>
+        <div class="space-y-2">${c.services.map(s => `
+          <div class="rounded-[10px] border border-aw-border p-3">
+            <div class="flex items-center gap-2"><span class="font-bold">${s.name}</span><span class="mono text-[11px] text-aw-muted">${s.slug || ''} #${s.id}</span><span class="flex-1"></span>${statusBadge(s.status)}</div>
+            <div class="text-[12px] text-aw-muted mt-1">${s.description || '<i>No description — ask customer</i>'}</div>
+            <div class="text-[12px] mt-1"><strong>${fmtDH(s.price)}/mo</strong> • exp <span class="mono">${expiryTxt(s.expires_at)}</span> • folder <span class="mono">customers/${c.id}/${s.slug}/</span></div>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <button class="btn" onclick="svcActivate(${s.id},'${c.id}')">Activate +30d</button>
+              <button class="btn" onclick="openPayModal('${c.id}',${s.id})">Paid 💰</button>
+              <button class="btn" onclick="svcExtend(${s.id},30)">+30d</button>
+              <button class="btn" onclick="svcSuspend(${s.id})">Suspend</button>
+              <button class="btn btn-danger" onclick="svcRemove(${s.id})">Remove</button>
+            </div>
+          </div>`).join('') || '<div class="text-aw-muted text-[13px]">No services — add the first with description for AI.</div>'}</div>
+      </div>
+      <div class="rounded-[12px] border border-aw-border p-4">
+        <div class="font-sora font-bold mb-2">💰 Payments (${c.payments.length})</div>
+        <div class="space-y-1.5 text-[13px]">${c.payments.map(p => `<div class="flex gap-2"><span class="font-bold">${fmtDH(p.amount)}</span>${statusBadge(p.status)}<span class="mono text-aw-muted">svc ${p.service_id || '—'}</span><span class="flex-1"></span><span class="text-aw-muted">${(p.paid_at || '').slice(0, 10)}</span></div>`).join('') || '<div class="text-aw-muted">No payments.</div>'}</div>
+      </div>
+      <div class="rounded-[12px] border border-aw-border p-4">
+        <div class="font-sora font-bold mb-2">💬 WhatsApp accounts (${c.whatsappAccounts.length})</div>
+        <div class="text-[13px]">${c.whatsappAccounts.map(w => `<div class="mono">${w.display_number || w.label || '#' + w.id} — ${w.status}</div>`).join('') || '<div class="text-aw-muted">None linked. Use WhatsApp tab → Connect number.</div>'}</div>
+      </div>`;
+  } catch (e) { $('drawerBody').innerHTML = '<div class="text-red-600">' + e.message + '</div>'; }
+}
+function closeDrawer() { $('drawer').classList.add('translate-x-full'); setTimeout(() => $('drawerWrap').classList.add('hidden'), 220); }
+
+// actions
+async function saveProfile(id) { try { await api(`/api/admin/customers/${id}/profile`, { method: 'POST', body: JSON.stringify({ name: $('editName').value, username: $('editUser').value }) }); toast('Saved'); refreshAll(); openCustomer(id); } catch (e) { toast(e.message, true); } }
+async function attachChannel(id, type) {
+  const val = type === 'telegram' ? $('addTg').value.trim() : $('addWa').value.trim();
+  if (!val) return toast('Enter an ID first', true);
+  try { await api(`/api/admin/customers/${id}/identities`, { method: 'POST', body: JSON.stringify({ type, externalId: val }) }); toast('Channel linked ✓'); refreshAll(); openCustomer(id); } catch (e) { toast(e.message, true); }
+}
+async function detachChannel(id, type, ext) { if (!confirm(`Unlink ${type} ${ext}?`)) return; try { await api(`/api/admin/customers/${id}/identities/${type}/${encodeURIComponent(ext)}`, { method: 'DELETE' }); toast('Unlinked'); refreshAll(); openCustomer(id); } catch (e) { toast(e.message, true); } }
+function openCustomerModal() {
+  openModal('＋ Add customer (channels later)', `
+    <div class="space-y-3">
+      <div><label class="text-[12px] font-bold text-aw-muted">NAME *</label><input id="f-cust-name" class="field" placeholder="Ahmed — Boutique Casa" /></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-[12px] font-bold text-aw-muted">@USERNAME (optional)</label><input id="f-cust-user" class="field" placeholder="ahmed" /></div>
+        <div><label class="text-[12px] font-bold text-aw-muted">STATUS</label><select id="f-cust-status" class="field"><option>TRIAL</option><option>ACTIVE</option><option>SUSPENDED</option></select></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-[12px] font-bold text-aw-muted">TELEGRAM ID (optional)</label><input id="f-cust-tg" class="field mono" placeholder="123456789" /></div>
+        <div><label class="text-[12px] font-bold text-aw-muted">WHATSAPP (optional)</label><input id="f-cust-wa" class="field mono" placeholder="2126XXXXXXXX" /></div>
+      </div>
+      <div><label class="text-[12px] font-bold text-aw-muted">NOTES</label><textarea id="f-cust-notes" class="field" rows="2" placeholder="Met on Facebook, wants order automation…"></textarea></div>
+      <button class="btn btn-primary w-full justify-center !py-2.5" onclick="submitCustomer()">Create →</button>
+      <div class="text-[12px] text-aw-muted">Gets next ID (C-000X). Link Telegram/WhatsApp now or later from the customer drawer.</div>
+    </div>`);
+}
+async function submitCustomer() {
+  const payload = { name: $('f-cust-name').value, username: $('f-cust-user').value, status: $('f-cust-status').value, telegramId: $('f-cust-tg').value, whatsappId: $('f-cust-wa').value, notes: $('f-cust-notes').value };
+  if (!payload.name.trim() && !payload.telegramId.trim() && !payload.whatsappId.trim()) return toast('Name or channel required', true);
+  try { const r = await api('/api/admin/customers', { method: 'POST', body: JSON.stringify(payload) }); toast(`Created ${r.id} ✓`); closeModal(); refreshAll(); openCustomer(r.id); } catch (e) { toast(e.message, true); }
+}
+async function custStatus(id, status) { try { await api(`/api/admin/customers/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }); toast(id + ' → ' + status); refreshAll(); openCustomer(id); } catch (e) { toast(e.message, true); } }
+async function custDelete(id) { if (!confirm('Delete ' + id + ' + all services?')) return; try { await api('/api/admin/customers/' + id, { method: 'DELETE' }); toast('Deleted ' + id); closeDrawer(); refreshAll(); } catch (e) { toast(e.message, true); } }
+async function saveNotes(id) { try { await api(`/api/admin/customers/${id}/notes`, { method: 'POST', body: JSON.stringify({ notes: $('notesField').value }) }); toast('Notes saved'); } catch (e) { toast(e.message, true); } }
+async function svcActivate(id, customerId) { try { await api(`/api/admin/services/${id}/activate`, { method: 'POST', body: JSON.stringify({ months: 1, customerId }) }); toast('Activated +30d'); refreshAll(); } catch (e) { toast(e.message, true); } }
+async function svcSuspend(id) { try { await api(`/api/admin/services/${id}/suspend`, { method: 'POST', body: '{}' }); toast('Suspended'); refreshAll(); } catch (e) { toast(e.message, true); } }
+async function svcExtend(id, days) { try { await api(`/api/admin/services/${id}/extend`, { method: 'POST', body: JSON.stringify({ days }) }); toast('Extended +' + days + 'd'); refreshAll(); } catch (e) { toast(e.message, true); } }
+async function svcRemove(id) { if (!confirm('Remove service #' + id + '?')) return; try { await api('/api/admin/services/' + id, { method: 'DELETE' }); toast('Removed'); closeDrawer(); refreshAll(); } catch (e) { toast(e.message, true); } }
+async function waDelete(id) { if (!confirm('Remove WhatsApp account #' + id + '?')) return; try { await api('/api/admin/whatsapp-accounts/' + id, { method: 'DELETE' }); toast('Removed'); refreshAll(); } catch (e) { toast(e.message, true); } }
+
+// modals
+function openModal(title, html) { $('modalTitle').textContent = title; $('modalBody').innerHTML = html; $('modalWrap').classList.remove('hidden'); }
+function closeModal() { $('modalWrap').classList.add('hidden'); }
+function openServiceModal(presetCustomer = '') {
+  openModal('＋ Add service (TRIAL, no code yet)', `
+    <div class="space-y-3">
+      <div><label class="text-[12px] font-bold text-aw-muted">CUSTOMER</label><input id="f-svc-cust" class="field mono" value="${presetCustomer}" placeholder="C-0001" /></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">NAME</label><input id="f-svc-name" class="field" placeholder="order-processing" /></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">DESCRIPTION — AI will use this to implement</label><textarea id="f-svc-desc" class="field" rows="3" placeholder="cron daily 9am: import Excel orders from WhatsApp, validate, generate PDF invoices…"></textarea></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">PRICE DH / MONTH</label><input id="f-svc-price" type="number" class="field" placeholder="500" /></div>
+      <button class="btn btn-primary w-full justify-center !py-2.5" onclick="submitService()">Create TRIAL + folder →</button>
+      <div class="text-[12px] text-aw-muted">Creates <span class="mono">customers/C-XXXX/slug/README.md</span> with AI prompt. Customer tests, then you Activate/Paid.</div>
+    </div>`);
+}
+async function submitService() {
+  const customerId = $('f-svc-cust').value.trim().toUpperCase(), name = $('f-svc-name').value.trim();
+  const description = $('f-svc-desc').value.trim(), priceDH = Number($('f-svc-price').value || 0);
+  if (!customerId || !name) return toast('Customer + name required', true);
+  try { const r = await api('/api/admin/services', { method: 'POST', body: JSON.stringify({ customerId, name, description, priceDH }) }); toast(`Created ${r.name} TRIAL`); closeModal(); refreshAll(); } catch (e) { toast(e.message, true); }
+}
+function openPayModal(presetCustomer = '', presetSvc = '') {
+  openModal('💰 Record payment + activate 30d', `
+    <div class="space-y-3">
+      <div><label class="text-[12px] font-bold text-aw-muted">CUSTOMER</label><input id="f-pay-cust" class="field mono" value="${presetCustomer}" placeholder="C-0001" /></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">SERVICE ID (optional)</label><input id="f-pay-svc" class="field mono" value="${presetSvc}" placeholder="1" /></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">AMOUNT DH</label><input id="f-pay-amt" type="number" class="field" placeholder="500" /></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">METHOD</label><select id="f-pay-method" class="field"><option>cash</option><option>transfer</option><option>manual</option></select></div>
+      <button class="btn btn-primary w-full justify-center !py-2.5" onclick="submitPay()">Record PAID →</button>
+    </div>`);
+}
+async function submitPay() {
+  const customerId = $('f-pay-cust').value.trim().toUpperCase(), serviceId = Number($('f-pay-svc').value || 0) || undefined;
+  const amountDH = Number($('f-pay-amt').value || 0), method = $('f-pay-method').value;
+  if (!customerId || !amountDH) return toast('Customer + amount required', true);
+  try { await api('/api/admin/payments', { method: 'POST', body: JSON.stringify({ customerId, serviceId, amountDH, method }) }); toast('Payment recorded'); closeModal(); refreshAll(); } catch (e) { toast(e.message, true); }
+}
+function openWaModal() {
+  openModal('💬 Connect WhatsApp Business number', `
+    <div class="space-y-3">
+      <div><label class="text-[12px] font-bold text-aw-muted">LABEL</label><input id="f-wa-label" class="field" placeholder="Boutique Casa — 2126…" /></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-[12px] font-bold text-aw-muted">DISPLAY NUMBER</label><input id="f-wa-num" class="field mono" placeholder="+2126XXXXXXXX" /></div>
+        <div><label class="text-[12px] font-bold text-aw-muted">CUSTOMER (optional)</label><input id="f-wa-cust" class="field mono" placeholder="C-0001" /></div>
+      </div>
+      <div><label class="text-[12px] font-bold text-aw-muted">PHONE NUMBER ID (Meta)</label><input id="f-wa-pid" class="field mono" placeholder="1208…" /></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">BUSINESS ACCOUNT ID</label><input id="f-wa-bid" class="field mono" placeholder="2738…" /></div>
+      <div><label class="text-[12px] font-bold text-aw-muted">ACCESS TOKEN (customer gave you)</label><input id="f-wa-tok" type="password" class="field mono" placeholder="EAA…" /></div>
+      <button class="btn btn-primary w-full justify-center !py-2.5" onclick="submitWa()">Connect →</button>
+    </div>`);
+}
+async function submitWa() {
+  const payload = { label: $('f-wa-label').value, displayNumber: $('f-wa-num').value, customerId: $('f-wa-cust').value.trim().toUpperCase() || null, phoneNumberId: $('f-wa-pid').value, businessAccountId: $('f-wa-bid').value, accessToken: $('f-wa-tok').value };
+  try { await api('/api/admin/whatsapp-accounts', { method: 'POST', body: JSON.stringify(payload) }); toast('WhatsApp connected'); closeModal(); refreshAll(); } catch (e) { toast(e.message, true); }
+}
+
+boot();
+setInterval(() => { if ($('loginGate').classList.contains('hidden')) refreshAll(); }, 30000);
+</script>
+</body>
+</html>
